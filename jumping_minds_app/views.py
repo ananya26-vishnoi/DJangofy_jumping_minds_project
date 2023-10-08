@@ -87,7 +87,7 @@ def update_maintenance(request):
     history=History.objects.create(elevator_id=elevator,log="Elevator id "+str(elevator.id)+" is under maintenance" )
     history.save()
     if maintenance_state==False:
-        return 
+        return Response({"success":"Elevator is not under maintenance"},status=status.HTTP_200_OK)
     return Response({"success":"Elevator is under maintenance"},status=status.HTTP_200_OK)
 
 @api_view(['PUT'])

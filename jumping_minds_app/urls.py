@@ -10,5 +10,4 @@ urlpatterns = [
     path('UpdateMaintenance',views.update_maintenance,name='update_maintenance'),
     path('UpdateDoorState',views.update_door,name='update_door'),
     path('AssignElevator',views.assign_elevator,name='assign_elevator'),
-    
 ]
