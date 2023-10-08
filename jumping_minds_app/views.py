@@ -154,15 +154,23 @@ class Elevators:
         Returns:
         Response: The response object
         '''
-
+        # Check if elevator_id is present in request. If not, return error
         if "elevator_id" not in request.data:
             return Response({"error":"Elevator ID not Found"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get elevator
         elevator_id = request.data['elevator_id']
         elevator = Elevator.objects.get(id=elevator_id)
+
+        # Check if elevator is running. If not, return error
         if elevator.is_running == False:
             return Response({"error":"Elevator is not running"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if elevator is under maintenance. If yes, return error
         if elevator.maintaintenance == True:
             return Response({"error":"Elevator is under maintenance"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Return direction
         return JsonResponse({'direction': elevator.direction},status=status.HTTP_200_OK)
 
     @api_view(['PUT'])
@@ -176,18 +184,27 @@ class Elevators:
         Returns:
         Response: The response object
         '''
+        # Check if elevator_id is present in request. If not, return error
         if "elevator_id" not in request.data:
             return Response({"error":"Elevator ID not Found"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get elevator
         elevator_id = request.data['elevator_id']
         elevator = Elevator.objects.get(id=elevator_id)
+
+        # Check if elevator is running. If not, return error
         if "maintenance_state" not in request.data:
             return Response({"error":"Maintenance State not Found"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Update maintenance state
         maintenance_state = request.data['maintenance_state']
         elevator.maintaintenance = maintenance_state
         elevator.is_running = False
         elevator.save()
         history=History.objects.create(elevator_id=elevator,log="Elevator id "+str(elevator.id)+" is under maintenance" )
         history.save()
+
+        # Return success based on maintenance state
         if maintenance_state==False:
             return Response({"success":"Elevator is not under maintenance"},status=status.HTTP_200_OK)
         return Response({"success":"Elevator is under maintenance"},status=status.HTTP_200_OK)
@@ -203,17 +220,26 @@ class Elevators:
         Returns:
         Response: The response object
         '''
+        # Check if elevator_id is present in request. If not, return error
         if "elevator_id" not in request.data:
             return Response({"error":"Elevator ID not Found"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if door_state is present in request. If not, return error
         if "door_state" not in request.data:
             return Response({"error":"Door State not Found"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get data from request and update door state
         door_state = request.data['door_state']
         elevator_id = request.data['elevator_id']
         elevator = Elevator.objects.get(id=elevator_id)
         elevator.door_state = door_state
         elevator.save()
+
+        # Update history
         history=History.objects.create(elevator_id=elevator,log="Elevator id "+str(elevator.id)+" door closed" )
         history.save()
+
+        # Return success based on door state
         if door_state==True:
             elevator.is_running=True
             elevator.save()
@@ -232,14 +258,20 @@ class Elevators:
         Returns:
         Response: The response object
         '''
+
+        # Check if floor is present in request. If not, return error
         if "floor" not in request.data:
             return Response({"error":"Floor not Found"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get floor and assign elevator to it
         floor = request.data['floor']
         optimal_elevator=Helper.assign_elevator_to_floor(floor)
         update_elevator_state.delay(optimal_elevator.id,floor)
+
+        # Return success
         return Response({"success":"Elevator assigned","elevator_id":optimal_elevator.id},status=status.HTTP_200_OK)
 
-class History:
+class HistoryFunction:
 
     @api_view(['GET'])
     def get_history(request):
@@ -252,9 +284,15 @@ class History:
         Returns:
         Response: The response object
         '''
+
+        # Check if elevator_id is present in request. If not, return error
         if "elevator_id" not in request.data:
             return Response({"error":"Elevator ID not Found"},status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get history and serialize it
         elevator_id = request.data['elevator_id']
         history = History.objects.filter(elevator_id=elevator_id)
         serializer = HistorySerializer(history, many=True)
+
+        # Return serialized data
         return Response(serializer.data, status=status.HTTP_200_OK)
