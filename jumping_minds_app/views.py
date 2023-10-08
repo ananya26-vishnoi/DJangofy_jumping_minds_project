@@ -28,7 +28,7 @@ def get_number_of_elevators(request):
     for i in range(number_of_elevators):
         elevator = Elevator.objects.create()
         elevator.save()
-        history=History.objects.create(elevator_id=elevator,log="Elevator id {i} created" )
+        history=History.objects.create(elevator_id=elevator,log="Elevator id "+str(elevator.id)+" created" )
         history.save()
     return Response({"success":"Elevator created"},status=status.HTTP_200_OK)
 
@@ -84,7 +84,7 @@ def update_maintenance(request):
     elevator.maintaintenance = maintenance_state
     elevator.is_running = False
     elevator.save()
-    history=History.objects.create(elevator_id=elevator,log="Elevator id {i} is under maintenance" )
+    history=History.objects.create(elevator_id=elevator,log="Elevator id "+str(elevator.id)+" is under maintenance" )
     history.save()
     if maintenance_state==False:
         return 
@@ -101,7 +101,7 @@ def update_door(request):
     elevator = Elevator.objects.get(id=elevator_id)
     elevator.door_state = door_state
     elevator.save()
-    history=History.objects.create(elevator_id=elevator,log="Elevator id {i} door closed" )
+    history=History.objects.create(elevator_id=elevator,log="Elevator id "+str(elevator.id)+" door closed" )
     history.save()
     if door_state==True:
         elevator.is_running=True
@@ -156,6 +156,7 @@ def assign_elevator(request):
     floor = request.data['floor']
     optimal_elevator=assign_elevator_to_floor(floor)
     update_elevator_state.delay(optimal_elevator.id,floor)
-    return Response({"success":"Elevator assigned","elevator_id":optimal_elevator.id},status=status.HTTP_200_OK)    
+    return Response({"success":"Elevator assigned","elevator_id":optimal_elevator.id},status=status.HTTP_200_OK)
 
-    
+
+    pass

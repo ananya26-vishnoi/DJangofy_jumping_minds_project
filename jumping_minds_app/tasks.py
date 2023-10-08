@@ -1,5 +1,5 @@
 from celery import shared_task
-from .models import Elevator
+from .models import Elevator, History
 import time
 import threading  
 
@@ -50,6 +50,8 @@ def update_elevator_state(elevator_id,floor):
         while elevator.current_floor != final_floor:
             if elevator.is_running==True:
                 elevator.current_floor=elevator.current_floor+1 if elevator.direction=="up" else elevator.current_floor-1
+                history=History.objects.create(elevator_id=elevator,log="Elevator id " +str(elevator.id)+" is moving to the destination floor "+str(elevator.current_floor) )
+                history.save()
             elevator.save()
             print("Elevator is moving to the destination floor "+str(elevator.current_floor))
 
