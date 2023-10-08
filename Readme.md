@@ -74,4 +74,7 @@ To prevent any accidental disclosure of sensitive information, make sure to add 
 celery -A jumping_minds_project worker -l info -P eventlet
 ``` 
 
+## Postman Documentation
+
+https://documenter.getpostman.com/view/17181619/2s9YJgU1d3
 
